@@ -16,54 +16,9 @@ jobs:
     steps:
       - name: 版本对比
         run: |
-          # 发送GET请求
-          $response = Invoke-WebRequest -Uri https://api.github.com/repos/sq8422779/MoviePilot/git/refs/heads/v2 | ConvertFrom-Json
-          # echo $response.object.sha
-          $latest_commit_sha = $response.object.sha
-          echo $latest_commit_sha
-          # 获取倒数第二次提交的hash
-          $response1 = Invoke-WebRequest -Uri "https://api.github.com/repos/sq8422779/MoviePilot/git/commits/$latest_commit_sha" | ConvertFrom-Json
-          $newArray = [System.Collections.ArrayList]::new()
-          # 遍历数组中的每个对象
-          foreach ($item in $response1.parents) {
-            # 获取每个对象的sha属性值
-            $sha = $item.sha
-            echo $sha
-            # 将sha属性值添加到新数组中
-            $newArray.Add($sha)
-          }
           $response3 = Invoke-WebRequest -Uri https://api.github.com/repos/jxxghp/MoviePilot/git/refs/heads/v2 | ConvertFrom-Json
           $jxxghp_version=$response3.object.sha
-          echo $jxxghp_version
-          if ($newArray -contains $jxxghp_version) {
-           # 获取所有发布版本
-           # $response4 = Invoke-WebRequest -Uri https://api.github.com/repos/sq8422779/Windows-MoviePilot/releases | ConvertFrom-Json
-           $response4 = Invoke-WebRequest -Uri https://api.github.com/repos/sq8422779/Windows-MoviePilot/releases/latest | ConvertFrom-Json
-           # 筛选出预发布版本
-           # $prereleases = $response4 | Where-Object { $_.prerelease -eq $true }
-           # 如果存在预发布版本，获取最新的一个
-           # if ($prereleases) {
-           if ($true) {
-               # $response5 = $prereleases | Sort-Object -Property published_at -Descending | Select-Object -First 1
-               # 提取tag_name的值
-               # $tagName = $response5.tag_name
-               $tagName = $response4.tag_name
-               echo $tagName
-               echo $jxxghp_version.Substring(0, 7)
-               if ($tagName.contains($jxxghp_version.Substring(0, 7))) {
-                 Write-Output "版本相同,无需更新"
-                 exit 1
-               } else {
-                 Write-Output "检测到新的commit 执行重新打包"
-               }
-           } else {
-               Write-Host "检测到新的commit 执行重新打包"
-           }
-          } else {
-           Write-Output "sq8422779/MoviePilot与上游仓库有代码冲突或上游代码与本仓库版本不一致,等待定时同步"
-           exit 1
-          }
-
+          echo $jxxghp_version.Substring(0, 7)
       - name: pull exe code
         uses: actions/checkout@v4
         with:
